@@ -3,3 +3,81 @@ title: "Big Mac"
 output: html_notebook
 ---
 
+This dataset has been uploaded on Kaggle website. 
+
+```{r}
+#dollars_ex is the conversation rate with the local currency. 
+
+#import data
+library(dplyr)
+
+bigmac <- read.csv("BigmacPrice.csv", header = TRUE)
+
+#rename columns
+names(bigmac)[names(bigmac) == "name"] <- "country"
+
+print(BigMac)
+
+#average price per country
+library(dplyr)
+
+bigmac_grouped <- bigmac %>%
+  group_by(country)
+
+bigmac_avg <- bigmac_grouped %>%
+  summarise(avg_price = mean(dollar_price))
+
+print(bigmac_avg)
+
+#graph avg
+library(ggplot2)
+
+graph_bigmac_avg <- ggplot(bigmac_avg, aes(x=country, y=avg_price)) +
+  geom_segment( aes(x=country, xend=country, y=0, yend=avg_price
+), color="skyblue") +
+  geom_point( color="blue", size=4, alpha=0.6) +
+  labs(
+  title = "Average price of a bigmac per country since 2000",
+  y = "Average price in dollars", x = "Countries"
+)+
+  theme_light() +
+  coord_flip() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.border = element_blank(),
+    axis.ticks.y = element_blank() 
+)
+
+graph_bigmac_avg
+```
+
+On the blue graph, we see that Norway has the most expensive bigmac in average, and Oman and Kowait the most cheepest ones. 
+For the analysis, we select the few following countries: Norway, Oman, Mexico, Germany and Thailand. 
+```{r}
+#filter countries
+library(ggplot2)
+library(dplyr)
+
+bigmac_subset <- bigmac %>% 
+  filter(country %in% c("Norway", "Oman", "Thailand", "Mexico", "France"))
+
+bigmac_subset$date <- as.Date(paste0(bigmac_subset$date, "-01-01"))
+
+ggplot(data = bigmac_subset, aes(x = date, y = dollar_price, color = country)) +
+  geom_line() +
+  labs(title = "BigMac prices through years",
+       x = "date",
+       y = "dollar_price") +
+  scale_color_discrete(name = "country")
+
+#Compute the number of data per country
+library(dplyr)
+
+data_country <- bigmac %>% 
+  group_by(country) %>% 
+  summarise(num_data = n())
+  
+print(data_country)
+```
+We see that Oman has only 9 data and Germany only 23. It is a few compared to Norway that has 33 data and Mexico 37. 
+
