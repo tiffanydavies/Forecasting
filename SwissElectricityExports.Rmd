@@ -2,3 +2,11 @@
 title: "Swiss electricty exports"
 output: html_notebook
 ---
+
+```{r}
+#import data
+library(readxl)
+
+swiss_elec <- read_excel("Electricity export Switzerland-3.xlsx")
+```
+
