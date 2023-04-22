@@ -10,3 +10,23 @@ library(readxl)
 swiss_elec <- read_excel("Electricity export Switzerland-3.xlsx")
 ```
 
+```{r}
+#delete useless rows
+swiss_elec <- swiss_elec[-c(1,2,3,4), ]
+
+#rename columns
+names(swiss_elec)[names(swiss_elec) == "...2"] <- "Germany"
+names(swiss_elec)[names(swiss_elec) == "...3"] <- "France"
+names(swiss_elec)[names(swiss_elec) == "...4"] <- "Italy"
+names(swiss_elec)[names(swiss_elec) == "...5"] <- "Austria"
+names(swiss_elec)[names(swiss_elec) == "...6"] <- "Lichtenstein"
+names(swiss_elec)[names(swiss_elec) == "...7"] <- "TOTAL"
+names(swiss_elec)[names(swiss_elec) == "Physical export of Switzerland of electricity by country"] <- "Exports"
+
+print(swiss_elec)
+```
+
+```{r}
+
+```
+
