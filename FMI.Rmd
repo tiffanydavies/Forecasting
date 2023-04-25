@@ -2,3 +2,100 @@
 title: "FMI"
 output: html_notebook
 ---
+
+```{r}
+#import data
+library(readxl)
+library(tidyverse)
+library(janitor)
+inflation_data <- read_excel("imf-dm-export-20230419.xls")
+```
+
+```{r}
+inflation_data_clean <- inflation_data %>%
+  # Remove first row (full of NA)
+  slice(-1) %>%
+  # Rename first column to "Country"
+  rename(Country = `Inflation rate, average consumer prices (Annual percent change)`) %>%
+  # Remove "no data" values and convert to NA
+  mutate_all(funs(na_if(., "no data"))) %>%
+  # Convert all values to numeric, except "Country"
+  mutate_at(vars(-Country), as.numeric) %>%
+  # Round all numeric values to 2 decimal, except "Country"
+  mutate_at(vars(-Country), round, 2) %>%
+  # Wide format to long format
+  gather(key = "Year", value = "Inflation_Rate", -Country) %>%
+  # Convert "Year" column to integer data type
+  mutate(Year = as.integer(Year))
+```
+
+
+Here we are simply showing the inflation rate in a specific country over time
+```{r}
+library(ggplot2)
+
+country_to_plot <- "Mexico"
+
+inflation_data_filtered <- inflation_data_clean %>%
+  filter(Country == country_to_plot)
+
+ggplot(inflation_data_filtered, aes(x = Year, y = Inflation_Rate)) +
+  geom_line() +
+  labs(title = paste("Inflation Rate in", country_to_plot),
+       x = "Year",
+       y = "Inflation Rate (%)") +
+  theme_minimal()
+```
+
+```{r}
+countries_to_plot <- c("Oman", "Norway", "France", "Mexico", "Thailand")
+
+inflation_data_filtered <- inflation_data_clean %>%
+  filter(Country %in% countries_to_plot)
+
+ggplot(inflation_data_filtered, aes(x = Year, y = Inflation_Rate, color = Country)) +
+  geom_line() +
+  labs(title = "Inflation Rate Comparison",
+       x = "Year",
+       y = "Inflation Rate (%)") +
+  theme_minimal()
+```
+We can easily oberve that there are many high value for inflation rate before the year of 2000 in Mexico
+
+
+
+Here we have a comparison of our arbitrary countries 
+```{r}
+ggplot(inflation_data_filtered, aes(x = Year, y = Inflation_Rate)) +
+  geom_line(aes(color = Country)) +
+  facet_wrap(~ Country, ncol = 2, scales = "free_y") +
+  labs(title = "Inflation Rate Comparison by Country",
+       x = "Year",
+       y = "Inflation Rate (%)") +
+  theme_minimal()
+```
+
+
+Here, we can see the difference of inflation rate between a base country of our choice, here the USA, and other countries 
+```{r}
+# Choose base country 
+base_country <- "United States"
+
+# Calculate the diff in inflation rates relative to base country
+inflation_data_difference <- inflation_data_clean %>%
+  filter(Country %in% countries_to_plot) %>%
+  left_join(inflation_data_clean %>% filter(Country == base_country), by = "Year", suffix = c("", paste0("_", gsub(" ", "_", base_country)))) %>%
+  mutate(Inflation_Rate_Difference = Inflation_Rate - !!sym(paste0("Inflation_Rate_", gsub(" ", "_", base_country)))) %>%
+  select(Country, Year, Inflation_Rate_Difference)
+
+# Create plot
+ggplot(inflation_data_difference, aes(x = Year, y = Inflation_Rate_Difference)) +
+  geom_line(aes(color = Country)) +
+  facet_wrap(~ Country, ncol = 2, scales = "free_y") +
+  labs(title = paste("Inflation Rate Difference Relative to", base_country),
+       x = "Year",
+       y = "Inflation Rate Difference (%)") +
+  theme_minimal()
+
+```
+
