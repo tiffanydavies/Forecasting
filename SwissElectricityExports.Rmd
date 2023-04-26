@@ -6,24 +6,63 @@ output: html_notebook
 ```{r}
 #import data
 library(readxl)
+library(ggplot2)
 
 swiss_elec <- read_excel("Electricity export Switzerland-3.xlsx")
 ```
 
 ```{r}
-#delete useless rows
-swiss_elec <- swiss_elec[-c(1,2,3,4), ]
 
-#rename columns
-names(swiss_elec)[names(swiss_elec) == "...2"] <- "Germany"
-names(swiss_elec)[names(swiss_elec) == "...3"] <- "France"
-names(swiss_elec)[names(swiss_elec) == "...4"] <- "Italy"
-names(swiss_elec)[names(swiss_elec) == "...5"] <- "Austria"
-names(swiss_elec)[names(swiss_elec) == "...6"] <- "Lichtenstein"
-names(swiss_elec)[names(swiss_elec) == "...7"] <- "TOTAL"
-names(swiss_elec)[names(swiss_elec) == "Physical export of Switzerland of electricity by country"] <- "Exports"
 
-print(swiss_elec)
+Electricity <- read_excel("Downloads/Electricity export Switzerland.xlsx")
+
+# Rename the columns
+colnames(Electricity) <- c("Date", "Germany", "France", "Austria", "Liechtenstein", "Italy", "Total.Export")
+
+# Remove the first 4 rows
+Electricity <- Electricity[-c(1:4), ]
+
+# Change Oktober for October
+Electricity$Date <- gsub("Oktober", "October", Electricity$Date)
+
+# Convert the date column to a date object
+Electricity$Date <- as.Date(paste("01", Electricity$Date), format = "%d %B %Y")
+
+# Create a time series object for the Total.Export data
+ts_data <- ts(Electricity$Total.Export, start = c(2000, 1), frequency = 12)
+
+# Create a time series object for the Germany data
+ts_germany <- ts(Electricity$Germany, start = c(2000, 1), frequency = 12)
+
+# Create a time series object for the France data
+ts_france <- ts(Electricity$France, start = c(2000, 1), frequency = 12)
+
+# Create a time series object for the Italy data
+ts_italy <- ts(Electricity$Italy, start = c(2000, 1), frequency = 12)
+
+# Create a time series object for the Austria data
+ts_austria <- ts(Electricity$Austria, start = c(2000, 1), frequency = 12)
+
+# Create a time series object for the Liechtenstein data
+ts_liechtenstein <- ts(Electricity$Liechtenstein, start = c(2000, 1), frequency = 12)
+
+# Plot the Total.Export time series
+plot(ts_data, xlab = "Year", ylab = "Electricity export (GWh)", main = "Electricity Export - Total")
+
+# Plot the Germany time series
+plot(ts_germany, xlab = "Year", ylab = "Electricity export (GWh)", main = "Electricity Export - Germany")
+
+# Plot the France time series
+plot(ts_france, xlab = "Year", ylab = "Electricity export (GWh)", main = "Electricity Export - France")
+
+# Plot the Italy time series
+plot(ts_italy, xlab = "Year", ylab = "Electricity export (GWh)", main = "Electricity Export - Italy")
+
+# Plot the Austria time series
+plot(ts_austria, xlab = "Year", ylab = "Electricity export (GWh)", main = "Electricity Export - Austria")
+
+# Plot the Liechtenstein time series
+plot(ts_liechtenstein, xlab = "Year", ylab = "Electricity export (GWh)", main = "Electricity Export - Liechtenstein")
 ```
 
 ```{r}
